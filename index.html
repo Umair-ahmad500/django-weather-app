@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather App</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background: lightblue;
+            padding-top: 100px;
+        }
+
+        .box {
+            background: white;
+            width: 400px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        input {
+            padding: 10px;
+            width: 200px;
+        }
+
+        button {
+            padding: 10px;
+            background: blue;
+            color: white;
+            border: none;
+        }
+
+        .weather {
+            margin-top: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+
+    <h1>Weather App 🌤️</h1>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <input
+            type="text"
+            name="city"
+            placeholder="Enter city"
+            required
+        >
+
+        <button type="submit">Search</button>
+
+    </form>
+
+    {% if weather %}
+
+    <div class="weather">
+
+        <h2>{{ weather.city }}</h2>
+
+        <h1>{{ weather.temperature }}°C</h1>
+
+        <h3>{{ weather.description }}</h3>
+
+        <p>Humidity: {{ weather.humidity }}%</p>
+
+        <p>Wind: {{ weather.wind }} m/s</p>
+
+    </div>
+
+    {% endif %}
+
+    {% if error %}
+
+        <p>{{ error }}</p>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>
