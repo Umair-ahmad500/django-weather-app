@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "name": "nimbus-weather-frontend",
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}

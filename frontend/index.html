@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nimbus Weather - Dynamic Real-Time Forecast</title>
+    <meta name="description" content="Sleek, real-time weather forecasting application powered by Django REST API backend and OpenWeather Map.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    </svg>
+                </div>
+                <h1 class="brand-title">Nimbus<span>Weather</span></h1>
+            </div>
+            
+            <div class="header-actions">
+                <button id="unit-toggle-btn" class="icon-btn" title="Toggle Celsius / Fahrenheit">
+                    <span id="unit-label">°C</span>
+                </button>
+                <button id="api-settings-btn" class="icon-btn" title="API Backend Settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Search Bar Section -->
+        <section class="search-section">
+            <form id="weather-search-form" class="search-form">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="city-input" placeholder="Search for a city (e.g., London, Tokyo, New York)..." required autocomplete="off">
+                    <button type="submit" id="search-btn" class="search-submit-btn">
+                        <span>Search</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="quick-cities">
+                <span class="quick-label">Popular:</span>
+                <button class="city-chip" data-city="London">London</button>
+                <button class="city-chip" data-city="New York">New York</button>
+                <button class="city-chip" data-city="Tokyo">Tokyo</button>
+                <button class="city-chip" data-city="Paris">Paris</button>
+                <button class="city-chip" data-city="Dubai">Dubai</button>
+            </div>
+        </section>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="loading-container hidden">
+            <div class="spinner"></div>
+            <p>Fetching weather forecast...</p>
+        </div>
+
+        <!-- Error Message Banner -->
+        <div id="error-banner" class="error-banner hidden">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span id="error-message">City not found! Please check the spelling.</span>
+        </div>
+
+        <!-- Weather Display Card -->
+        <main id="weather-card" class="weather-card hidden">
+            <div class="card-header">
+                <div class="location-info">
+                    <h2 id="weather-city">London</h2>
+                    <span id="weather-country" class="country-badge">GB</span>
+                </div>
+                <div class="condition-badge">
+                    <img id="weather-icon" src="" alt="Weather Icon">
+                    <span id="weather-description">Clear Sky</span>
+                </div>
+            </div>
+
+            <div class="main-temperature">
+                <div class="temp-display">
+                    <span id="temp-value">22</span><span class="degree-symbol">°</span>
+                </div>
+                <div class="temp-meta">
+                    <p class="feels-like">Feels like <span id="feels-like-value">21°C</span></p>
+                    <p class="temp-range">H: <span id="temp-max">25°</span> • L: <span id="temp-min">18°</span></p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-info">
+                        <span class="metric-label">Humidity</span>
+                        <span id="humidity-value" class="metric-value">65%</span>
+                    </div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-info">
+                        <span class="metric-label">Wind Speed</span>
+                        <span id="wind-value" class="metric-value">4.2 m/s</span>
+                    </div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-info">
+                        <span class="metric-label">Pressure</span>
+                        <span id="pressure-value" class="metric-value">1013 hPa</span>
+                    </div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-info">
+                        <span class="metric-label">Status</span>
+                        <span id="status-value" class="metric-value">Connected</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Welcome Initial State -->
+        <div id="welcome-state" class="welcome-state">
+            <div class="welcome-icon">🌤️</div>
+            <h3>Discover Weather Anywhere</h3>
+            <p>Enter a city name above or select a popular destination to view live temperature, humidity, and wind conditions.</p>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Powered by <a href="https://github.com/Umair-ahmad500/django-weather-app" target="_blank" rel="noopener">Django REST API Backend</a> & OpenWeatherMap</p>
+        </footer>
+    </div>
+
+    <!-- API Configuration Modal -->
+    <div id="api-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3>Backend API Settings</h3>
+            <p>Specify your Render Django API backend URL below:</p>
+            <div class="input-group">
+                <input type="text" id="api-url-input" placeholder="e.g. https://django-weather-api.onrender.com">
+            </div>
+            <p class="modal-hint">Leave default empty to automatically detect local or current host.</p>
+            <div class="modal-actions">
+                <button id="save-api-btn" class="primary-btn">Save API URL</button>
+                <button id="close-api-btn" class="secondary-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
