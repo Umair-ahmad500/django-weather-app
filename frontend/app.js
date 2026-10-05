@@ -41,15 +41,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Determine Backend URL dynamically
+    // Determine Backend URL dynamically
     function getApiEndpoint(city) {
         let baseUrl = customApiBaseUrl.trim();
+
         if (!baseUrl) {
-            // Default: check if local or deployed
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            baseUrl = isLocal ? 'http://127.0.0.1:8000' : '';
+            const isLocal =
+                window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1';
+
+            if (isLocal) {
+                baseUrl = 'http://127.0.0.1:8000';
+            } else {
+                baseUrl = 'https://django-weather-app-1-ux98.onrender.com';
+            }
         }
+
         // Remove trailing slash
         baseUrl = baseUrl.replace(/\/$/, '');
+
         return `${baseUrl}/api/weather/?city=${encodeURIComponent(city)}`;
     }
 
